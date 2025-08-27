@@ -1,6 +1,6 @@
 This is a student Management system.
 ----------------------------------------------------
-Deliverables:
+Deliverables:<br>
 ● A fully working React functional app.<br>
 ● Form handling powered by React Hook Form.<br>
 ● Separate male/female tables with real-time updates.<br>
