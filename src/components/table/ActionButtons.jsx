@@ -3,8 +3,18 @@ import React from "react";
 export default function ActionButtons({ onEdit, onDelete }) {
   return (
     <div className="flex gap-2">
-      <button onClick={onEdit} className="px-2 py-1 bg-yellow-400 rounded">Edit</button>
-      <button onClick={onDelete} className="px-2 py-1 bg-red-500 text-white rounded">Delete</button>
+      <button
+        onClick={onEdit}
+        className="px-3 py-1.5 bg-green-800 hover:bg-yellow-500 text-white font-medium rounded-lg shadow-sm transition"
+      >
+        Edit
+      </button>
+      <button
+        onClick={onDelete}
+        className="px-3 py-1.5 bg-red-800 hover:bg-red-600 text-white font-medium rounded-lg shadow-sm transition"
+      >
+        Delete
+      </button>
     </div>
   );
 }
