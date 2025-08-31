@@ -3,7 +3,7 @@ import React from "react";
 export default function InputField({ label, register, name, type = "text", errors, min, max }) {
   return (
     <div>
-      <label className="block text-sm font-medium  text-xl">{label}</label>
+      <label className="block text-sm font-medium text-xl">{label}</label>
       <input
         {...register(name, { required: true, min, max })}
         type={type}

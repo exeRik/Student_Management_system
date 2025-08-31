@@ -1,55 +1,61 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 
 export default function StudentForm({ onAdd, onUpdate, students, editing, cancelEdit }) {
-  const [form, setForm] = useState({ name: "", roll: "", marks: "", gender: "Male" });
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setValue,
+    formState: { errors },
+  } = useForm();
 
   useEffect(() => {
     if (editing?.roll) {
       const student = students.find((s) => s.roll === editing.roll);
       if (student) {
-        setForm({
-          name: student.name,
-          roll: student.roll,
-          marks: student.marks,
-          gender: student.gender,
-        });
+        setValue("name", student.name);
+        setValue("roll", student.roll);
+        setValue("marks", student.marks);
+        setValue("gender", student.gender);
       }
     } else {
-      setForm({ name: "", roll: "", marks: "", gender: "Male" });
+      reset({ name: "", roll: "", marks: "", gender: "Male" });
     }
-  }, [editing, students]);
+  }, [editing, students, setValue, reset]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    if (name === "marks") {
-      // restrict marks input between 0-100
-      if (value === "" || (Number(value) >= 0 && Number(value) <= 100)) {
-        setForm({ ...form, [name]: value });
-      }
-    } else {
-      setForm({ ...form, [name]: value });
+  const onSubmit = (data) => {
+    data.marks = Number(data.marks);
+
+    // 🚨 Duplicate roll check
+    const currentRoll = editing ? editing.roll : null;
+    const duplicate = students.some(
+      (s) => s.roll === data.roll && s.roll !== currentRoll
+    );
+    if (duplicate) {
+      toast.error("Roll No already exists!");
+      return;
     }
-  };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!form.name || !form.roll || form.marks === "") {
-      alert("Please fill all fields");
+    // 🚨 Marks check
+    if (data.marks < 0 || data.marks > 100) {
+      toast.error(" Marks must be between 0 and 100!");
       return;
     }
 
     if (editing) {
-      onUpdate(editing.roll, form); // pass original roll + new form data
+      onUpdate(editing.roll, data);
     } else {
-      onAdd(form);
+      onAdd(data);
     }
 
-    setForm({ name: "", roll: "", marks: "", gender: "Male" });
+    reset({ name: "", roll: "", marks: "", gender: "Male" });
   };
 
   return (
     <form
-      onSubmit={handleSubmit}
+      onSubmit={handleSubmit(onSubmit)}
       className="bg-white p-6 rounded-2xl shadow-lg space-y-4"
     >
       <h2 className="text-2xl font-bold text-gray-800">
@@ -58,36 +64,30 @@ export default function StudentForm({ onAdd, onUpdate, students, editing, cancel
 
       <div className="grid md:grid-cols-2 gap-4">
         <input
+          {...register("name", { required: true })}
           type="text"
-          name="name"
           placeholder="Name"
-          value={form.name}
-          onChange={handleChange}
           className="border p-2 rounded-lg"
         />
+
         <input
+          {...register("roll", { required: true })}
           type="text"
-          name="roll"
           placeholder="Roll No"
-          value={form.roll}
-          onChange={handleChange}
           className="border p-2 rounded-lg"
         />
       </div>
 
       <div className="grid md:grid-cols-2 gap-4">
         <input
+          {...register("marks", { required: true })}
           type="number"
-          name="marks"
           placeholder="Marks"
-          value={form.marks}
-          onChange={handleChange}
           className="border p-2 rounded-lg"
         />
+
         <select
-          name="gender"
-          value={form.gender}
-          onChange={handleChange}
+          {...register("gender", { required: true })}
           className="border p-2 rounded-lg"
         >
           <option>Male</option>
@@ -105,7 +105,10 @@ export default function StudentForm({ onAdd, onUpdate, students, editing, cancel
         {editing && (
           <button
             type="button"
-            onClick={cancelEdit}
+            onClick={() => {
+              cancelEdit();
+              reset({ name: "", roll: "", marks: "", gender: "Male" });
+            }}
             className="px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500"
           >
             Cancel

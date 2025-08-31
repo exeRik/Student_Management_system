@@ -7,20 +7,19 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import { computeStatus } from "./utils/computeStatus";
-import { isDuplicateRoll } from "./utils/checkDuplicate";
 
 export default function App() {
   const [students, setStudents] = useState([]);
   const [editing, setEditing] = useState(null); // { roll } when editing
 
+  // Check duplicate roll
+  const isDuplicateRoll = (roll, currentRoll = null) =>
+    students.some((s) => s.roll === roll && s.roll !== currentRoll);
+
   // Add student
   const addStudent = (data) => {
-    if (isDuplicateRoll(students, data.roll)) {
+    if (isDuplicateRoll(data.roll)) {
       toast.error("Roll No already exists");
-      return;
-    }
-    if (data.marks < 0 || data.marks > 100) {
-      toast.error("Marks must be between 0 and 100");
       return;
     }
     const newStudent = {
@@ -32,14 +31,10 @@ export default function App() {
     toast.success("Student added!");
   };
 
-  // Update student by roll
+  // Update student
   const updateStudent = (originalRoll, data) => {
-    if (isDuplicateRoll(students, data.roll, originalRoll)) {
+    if (isDuplicateRoll(data.roll, originalRoll)) {
       toast.error("Roll No already exists");
-      return;
-    }
-    if (data.marks < 0 || data.marks > 100) {
-      toast.error("Marks must be between 0 and 100");
       return;
     }
 
@@ -57,22 +52,21 @@ export default function App() {
     setEditing(null);
   };
 
-  // Delete student by roll
+  // Delete student
   const deleteStudent = (roll) => {
     setStudents((prev) => prev.filter((s) => s.roll !== roll));
     toast.error(`Student with Roll ${roll} deleted!`);
     if (editing?.roll === roll) setEditing(null);
   };
 
-  // Start editing by roll
+  // Start editing
   const editStudent = (roll) => setEditing({ roll });
 
-  // Filter students by gender
+  // Filter by gender
   const maleStudents = useMemo(
     () => students.filter((s) => s.gender === "Male"),
     [students]
   );
-
   const femaleStudents = useMemo(
     () => students.filter((s) => s.gender === "Female"),
     [students]

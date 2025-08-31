@@ -5,13 +5,15 @@ export default function ActionButtons({ onEdit, onDelete }) {
     <div className="flex gap-2">
       <button
         onClick={onEdit}
-        className="px-3 py-1.5 bg-green-800 hover:bg-yellow-500 text-white font-medium rounded-lg shadow-sm transition"
+        className="px-3 py-1 rounded bg-yellow-300 hover:bg-yellow-400 text-sm font-medium transition"
       >
         Edit
       </button>
       <button
-        onClick={onDelete}
-        className="px-3 py-1.5 bg-red-800 hover:bg-red-600 text-white font-medium rounded-lg shadow-sm transition"
+        onClick={() => {
+          if (confirm("Delete this student?")) onDelete();
+        }}
+        className="px-3 py-1 rounded bg-red-500 hover:bg-red-600 text-sm font-medium text-white transition"
       >
         Delete
       </button>
