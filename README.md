@@ -7,3 +7,6 @@ Deliverables:<br>
 ● Edit/Delete functionality with validation.<br>
 ● Statistics panel showing gender-based averages.<br>
 ● Toast notifications for all CRUD operations.
+-----------------------------------------------------
+Live preview:
+ https://student-management-system-kphv.vercel.app/
