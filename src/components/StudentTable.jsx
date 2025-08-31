@@ -8,8 +8,9 @@ export default function StudentTable({ title, students, onEdit, onDelete }) {
       <table className="w-full border-collapse text-xl">
         <thead>
           <tr className="bg-gradient-to-r from-gray-200 to-gray-300 text-gray-700 uppercase text-sm tracking-wide">
-            <th className="border-b p-3 text-left">Name</th>
+            
             <th className="border-b p-3 text-left">Roll</th>
+            <th className="border-b p-3 text-left">Name</th>
             <th className="border-b p-3 text-left">Marks</th>
             <th className="border-b p-3 text-left">Status</th>
             <th className="border-b p-3 text-left">Actions</th>

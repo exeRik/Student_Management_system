@@ -1,56 +1,45 @@
 import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
+import { isDuplicateRoll } from "../utils/studentUtils";
 
-export default function StudentForm({ onAdd, onUpdate, students, editing, cancelEdit }) {
+const defaultValues = { name: "", roll: "", marks: "", gender: "Male" };
+
+export default function StudentForm({ onSubmitForm, students, editing, cancelEdit }) {
   const {
     register,
     handleSubmit,
     reset,
-    setValue,
     formState: { errors },
-  } = useForm();
+  } = useForm({ defaultValues });
 
+  // Prefill form when editing
   useEffect(() => {
     if (editing?.roll) {
       const student = students.find((s) => s.roll === editing.roll);
-      if (student) {
-        setValue("name", student.name);
-        setValue("roll", student.roll);
-        setValue("marks", student.marks);
-        setValue("gender", student.gender);
-      }
-    } else {
-      reset({ name: "", roll: "", marks: "", gender: "Male" });
-    }
-  }, [editing, students, setValue, reset]);
+      if (student) reset(student);
+    } else reset(defaultValues);
+  }, [editing, students, reset]);
 
+  // Toast for marks validation errors
+  useEffect(() => {
+    if (errors.marks) {
+      toast.error(errors.marks.message || "Marks must be between 0 and 100!");
+    }
+  }, [errors.marks]);
+
+  // Toast for roll validation errors
+  useEffect(() => {
+    if (errors.roll) {
+      toast.error(errors.roll.message);
+    }
+  }, [errors.roll]);
+
+  // Form submit handler
   const onSubmit = (data) => {
-    data.marks = Number(data.marks);
-
-    // 🚨 Duplicate roll check
-    const currentRoll = editing ? editing.roll : null;
-    const duplicate = students.some(
-      (s) => s.roll === data.roll && s.roll !== currentRoll
-    );
-    if (duplicate) {
-      toast.error("Roll No already exists!");
-      return;
-    }
-
-    // 🚨 Marks check
-    if (data.marks < 0 || data.marks > 100) {
-      toast.error(" Marks must be between 0 and 100!");
-      return;
-    }
-
-    if (editing) {
-      onUpdate(editing.roll, data);
-    } else {
-      onAdd(data);
-    }
-
-    reset({ name: "", roll: "", marks: "", gender: "Male" });
+    const currentRoll = editing ? editing.roll : null; // track editing roll
+    onSubmitForm(data, currentRoll);
+    reset(defaultValues);
   };
 
   return (
@@ -62,39 +51,47 @@ export default function StudentForm({ onAdd, onUpdate, students, editing, cancel
         {editing ? "Edit Student" : "Add Student"}
       </h2>
 
+      {/* Name & Roll */}
       <div className="grid md:grid-cols-2 gap-4">
         <input
-          {...register("name", { required: true })}
+          {...register("name", { required: "Name is required" })}
           type="text"
           placeholder="Name"
           className="border p-2 rounded-lg"
         />
-
         <input
-          {...register("roll", { required: true })}
+          {...register("roll", {
+            required: "Roll No is required",
+            validate: (value) => {
+              const currentRoll = editing?.roll || null;
+              return !isDuplicateRoll(students, value, currentRoll) || "Roll No already exists!";
+            },
+          })}
           type="text"
           placeholder="Roll No"
           className="border p-2 rounded-lg"
         />
       </div>
 
+      {/* Marks & Gender */}
       <div className="grid md:grid-cols-2 gap-4">
         <input
-          {...register("marks", { required: true })}
+          {...register("marks", {
+            required: "Marks is required",
+            validate: (value) =>
+              (value >= 0 && value <= 100) || "Marks must be between 0 and 100",
+          })}
           type="number"
           placeholder="Marks"
           className="border p-2 rounded-lg"
         />
-
-        <select
-          {...register("gender", { required: true })}
-          className="border p-2 rounded-lg"
-        >
+        <select {...register("gender", { required: true })} className="border p-2 rounded-lg">
           <option>Male</option>
           <option>Female</option>
         </select>
       </div>
 
+      {/* Buttons */}
       <div className="flex gap-3">
         <button
           type="submit"
@@ -107,7 +104,7 @@ export default function StudentForm({ onAdd, onUpdate, students, editing, cancel
             type="button"
             onClick={() => {
               cancelEdit();
-              reset({ name: "", roll: "", marks: "", gender: "Male" });
+              reset(defaultValues);
             }}
             className="px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500"
           >
