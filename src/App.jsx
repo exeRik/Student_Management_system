@@ -11,7 +11,7 @@ import { isDuplicateRoll } from "./utils/checkDuplicate";
 
 export default function App() {
   const [students, setStudents] = useState([]);
-  const [editing, setEditing] = useState(null);
+  const [editing, setEditing] = useState(null); // { roll } when editing
 
   // Add student
   const addStudent = (data) => {
@@ -19,37 +19,64 @@ export default function App() {
       toast.error("Roll No already exists");
       return;
     }
-    const newStudent = { ...data, marks: Number(data.marks), status: computeStatus(data.marks) };
+    if (data.marks < 0 || data.marks > 100) {
+      toast.error("Marks must be between 0 and 100");
+      return;
+    }
+    const newStudent = {
+      ...data,
+      marks: Number(data.marks),
+      status: computeStatus(data.marks),
+    };
     setStudents((prev) => [...prev, newStudent]);
     toast.success("Student added!");
   };
 
-  // Update student
-  const updateStudent = (index, data) => {
-    if (isDuplicateRoll(students, data.roll, index)) {
+  // Update student by roll
+  const updateStudent = (originalRoll, data) => {
+    if (isDuplicateRoll(students, data.roll, originalRoll)) {
       toast.error("Roll No already exists");
       return;
     }
-    const updatedStudent = { ...data, marks: Number(data.marks), status: computeStatus(data.marks) };
-    setStudents((prev) => prev.map((s, i) => (i === index ? updatedStudent : s)));
+    if (data.marks < 0 || data.marks > 100) {
+      toast.error("Marks must be between 0 and 100");
+      return;
+    }
+
+    const updatedStudent = {
+      ...data,
+      marks: Number(data.marks),
+      status: computeStatus(data.marks),
+    };
+
+    setStudents((prev) =>
+      prev.map((s) => (s.roll === originalRoll ? updatedStudent : s))
+    );
+
     toast.info("Student updated!");
     setEditing(null);
   };
 
-  // Delete student
-  const deleteStudent = (index) => {
-    const roll = students[index].roll;
-    setStudents((prev) => prev.filter((_, i) => i !== index));
+  // Delete student by roll
+  const deleteStudent = (roll) => {
+    setStudents((prev) => prev.filter((s) => s.roll !== roll));
     toast.error(`Student with Roll ${roll} deleted!`);
-    if (editing?.index === index) setEditing(null);
+    if (editing?.roll === roll) setEditing(null);
   };
 
-  // Start editing
-  const editStudent = (index) => setEditing({ index });
+  // Start editing by roll
+  const editStudent = (roll) => setEditing({ roll });
 
-  // Derived lists
-  const maleStudents = useMemo(() => students.filter((s) => s.gender === "Male"), [students]);
-  const femaleStudents = useMemo(() => students.filter((s) => s.gender === "Female"), [students]);
+  // Filter students by gender
+  const maleStudents = useMemo(
+    () => students.filter((s) => s.gender === "Male"),
+    [students]
+  );
+
+  const femaleStudents = useMemo(
+    () => students.filter((s) => s.gender === "Female"),
+    [students]
+  );
 
   return (
     <div className="min-h-screen p-6 bg-gray-50">
@@ -82,7 +109,11 @@ export default function App() {
         <StatsPanel students={students} />
       </div>
 
-      <ToastContainer position="top-right" autoClose={2000} hideProgressBar={false} />
+      <ToastContainer
+        position="top-right"
+        autoClose={2000}
+        hideProgressBar={false}
+      />
     </div>
   );
 }

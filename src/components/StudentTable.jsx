@@ -1,5 +1,5 @@
 import React from "react";
-import StudentRow from "./table/StudentRow";
+import TableRow from "./table/TableRow";
 
 export default function StudentTable({ title, students, onEdit, onDelete }) {
   return (
@@ -8,8 +8,8 @@ export default function StudentTable({ title, students, onEdit, onDelete }) {
       <table className="w-full border-collapse text-xl">
         <thead>
           <tr className="bg-gradient-to-r from-gray-200 to-gray-300 text-gray-700 uppercase text-sm tracking-wide">
-            <th className="border-b p-3 text-left">Roll</th>
             <th className="border-b p-3 text-left">Name</th>
+            <th className="border-b p-3 text-left">Roll</th>
             <th className="border-b p-3 text-left">Marks</th>
             <th className="border-b p-3 text-left">Status</th>
             <th className="border-b p-3 text-left">Actions</th>
@@ -17,11 +17,10 @@ export default function StudentTable({ title, students, onEdit, onDelete }) {
         </thead>
         <tbody>
           {students.length > 0 ? (
-            students.map((s, idx) => (
-              <StudentRow
-                key={idx}
+            students.map((s) => (
+              <TableRow
+                key={s.roll}
                 student={s}
-                index={idx}
                 onEdit={onEdit}
                 onDelete={onDelete}
               />

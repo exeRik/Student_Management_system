@@ -1,80 +1,117 @@
-import React, { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import InputField from "./form/InputField";
-import SelectField from "./form/SelectField";
-
-const defaultValues = { name: "", roll: "", marks: "", gender: "Male" };
+import React, { useState, useEffect } from "react";
 
 export default function StudentForm({ onAdd, onUpdate, students, editing, cancelEdit }) {
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm({ defaultValues });
+  const [form, setForm] = useState({ name: "", roll: "", marks: "", gender: "Male" });
 
   useEffect(() => {
-    if (editing !== null) {
-      const s = students[editing.index];
-      if (s) reset({ name: s.name, roll: s.roll, marks: s.marks, gender: s.gender });
+    if (editing?.roll) {
+      const student = students.find((s) => s.roll === editing.roll);
+      if (student) {
+        setForm({
+          name: student.name,
+          roll: student.roll,
+          marks: student.marks,
+          gender: student.gender,
+        });
+      }
     } else {
-      reset(defaultValues);
+      setForm({ name: "", roll: "", marks: "", gender: "Male" });
     }
-  }, [editing, students, reset]);
+  }, [editing, students]);
 
-  const onSubmit = (data) => {
-    if (editing !== null) onUpdate(editing.index, data);
-    else onAdd(data);
-    reset(defaultValues);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "marks") {
+      // restrict marks input between 0-100
+      if (value === "" || (Number(value) >= 0 && Number(value) <= 100)) {
+        setForm({ ...form, [name]: value });
+      }
+    } else {
+      setForm({ ...form, [name]: value });
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!form.name || !form.roll || form.marks === "") {
+      alert("Please fill all fields");
+      return;
+    }
+
+    if (editing) {
+      onUpdate(editing.roll, form); // pass original roll + new form data
+    } else {
+      onAdd(form);
+    }
+
+    setForm({ name: "", roll: "", marks: "", gender: "Male" });
   };
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300  ">
-      <h2 className="text-2xl font-semibold mb-4 text-gray-800">{editing ? "Edit Student" : "Add Student"}</h2>
-      <form onSubmit={handleSubmit(onSubmit)} className="grid md:grid-cols-2 gap-4">
-        <InputField
-          label="Name"
-          {...{ register, name: "name", errors }}
-          className="border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-        />
-        <InputField
-          label="Roll No"
-          {...{ register, name: "roll", errors }}
-          className="border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-        />
-        <InputField
-          label="Marks (0–100)"
-          type="number"
-          min={0}
-          max={100}
-          {...{ register, name: "marks", errors }}
-          className="border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-        />
-        <SelectField
-          label="Gender"
-          {...{ register, name: "gender", errors }}
-          options={["Male", "Female"]}
-          className="border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-        />
+    <form
+      onSubmit={handleSubmit}
+      className="bg-white p-6 rounded-2xl shadow-lg space-y-4"
+    >
+      <h2 className="text-2xl font-bold text-gray-800">
+        {editing ? "Edit Student" : "Add Student"}
+      </h2>
 
-        <div className="md:col-span-2 flex gap-2">
+      <div className="grid md:grid-cols-2 gap-4">
+        <input
+          type="text"
+          name="name"
+          placeholder="Name"
+          value={form.name}
+          onChange={handleChange}
+          className="border p-2 rounded-lg"
+        />
+        <input
+          type="text"
+          name="roll"
+          placeholder="Roll No"
+          value={form.roll}
+          onChange={handleChange}
+          className="border p-2 rounded-lg"
+        />
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-4">
+        <input
+          type="number"
+          name="marks"
+          placeholder="Marks"
+          value={form.marks}
+          onChange={handleChange}
+          className="border p-2 rounded-lg"
+        />
+        <select
+          name="gender"
+          value={form.gender}
+          onChange={handleChange}
+          className="border p-2 rounded-lg"
+        >
+          <option>Male</option>
+          <option>Female</option>
+        </select>
+      </div>
+
+      <div className="flex gap-3">
+        <button
+          type="submit"
+          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+        >
+          {editing ? "Update" : "Add"}
+        </button>
+        {editing && (
           <button
-            type="submit"
-            className="px-4 py-2 rounded bg-blue-900 text-white hover:bg-blue-700 transition"
+            type="button"
+            onClick={cancelEdit}
+            className="px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500"
           >
-            {editing ? "Update Student" : "Add Student"}
+            Cancel
           </button>
-          {editing !== null && (
-            <button
-              type="button"
-              onClick={() => { cancelEdit(); reset(defaultValues); }}
-              className="px-4 py-2 rounded bg-gray-200 text-gray-700 hover:bg-gray-300 transition"
-            >
-              Cancel
-            </button>
-          )}
-        </div>
-      </form>
-    </div>
+        )}
+      </div>
+    </form>
   );
 }

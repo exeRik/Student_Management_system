@@ -1,3 +1,6 @@
-export const isDuplicateRoll = (students, roll, excludeIndex = null) => {
-  return students.some((s, idx) => idx !== excludeIndex && String(s.roll) === String(roll));
+
+export const isDuplicateRoll = (students, roll, currentRoll = null) => {
+  return students.some(
+    (s) => s.roll === roll && s.roll !== currentRoll
+  );
 };
