@@ -16,24 +16,24 @@ export default function StudentTable({ title, students, onEdit, onDelete }) {
             <th className="border-b p-3 text-left">Actions</th>
           </tr>
         </thead>
-        <tbody>
-          {students.length > 0 ? (
-            students.map((s) => (
-              <TableRow
-                key={s.roll}
-                student={s}
-                onEdit={onEdit}
-                onDelete={onDelete}
-              />
-            ))
-          ) : (
-            <tr>
-              <td colSpan="5" className="text-center py-6 text-gray-500 italic">
-                No students found
-              </td>
-            </tr>
-          )}
-        </tbody>
+<tbody>
+  {students.length > 0 ? (
+    students.map((s, index) => (
+      <TableRow
+        key={`${s.roll}-${index}`} 
+        student={s}
+        onEdit={onEdit}
+        onDelete={onDelete}
+      />
+    ))
+  ) : (
+    <tr>
+      <td colSpan="5" className="text-center py-6 text-gray-500 italic">
+        No students found
+      </td>
+    </tr>
+  )}
+</tbody>
       </table>
     </div>
   );
