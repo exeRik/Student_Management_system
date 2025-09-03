@@ -1,39 +1,33 @@
-import React from "react";
-import TableRow from "./table/TableRow";
-
 export default function StudentTable({ title, students, onEdit, onDelete }) {
   return (
     <div className="bg-white p-6 rounded-2xl shadow-lg overflow-x-auto">
-      <h3 className="text-xl font-bold mb-4 text-gray-800">{title}</h3>
-      <table className="w-full border-collapse text-xl">
+      <h3 className="text-xl font-bold mb-4">{title}</h3>
+      <table className="w-full text-left">
         <thead>
-          <tr className="bg-gradient-to-r from-gray-200 to-gray-300 text-gray-700 uppercase text-sm tracking-wide">
-            
-            <th className="border-b p-3 text-left">Roll</th>
-            <th className="border-b p-3 text-left">Name</th>
-            <th className="border-b p-3 text-left">Marks</th>
-            <th className="border-b p-3 text-left">Status</th>
-            <th className="border-b p-3 text-left">Actions</th>
+          <tr>
+            <th>Name</th>
+            <th>Roll</th>
+            <th>Marks</th>
+            <th>Gender</th>
+            <th>Status</th>
+            <th>Actions</th>
           </tr>
         </thead>
-<tbody>
-  {students.length > 0 ? (
-    students.map((s, index) => (
-      <TableRow
-        key={`${s.roll}-${index}`} 
-        student={s}
-        onEdit={onEdit}
-        onDelete={onDelete}
-      />
-    ))
-  ) : (
-    <tr>
-      <td colSpan="5" className="text-center py-6 text-gray-500 italic">
-        No students found
-      </td>
-    </tr>
-  )}
-</tbody>
+        <tbody>
+          {students.map((s) => (
+            <tr key={s.id}>
+              <td>{s.name}</td>
+              <td>{s.roll}</td>
+              <td>{s.marks}</td>
+              <td>{s.gender}</td>
+              <td>{s.status}</td>
+              <td className="space-x-2">
+                <button onClick={() => onEdit(s)} className="px-2 py-1 bg-yellow-400 text-white rounded">Edit</button>
+                <button onClick={() => onDelete(s.id)} className="px-2 py-1 bg-red-500 text-white rounded">Delete</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
       </table>
     </div>
   );

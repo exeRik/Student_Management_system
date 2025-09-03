@@ -16,13 +16,11 @@ import {
 export default function App() {
   const [students, setStudents] = useState([]);
   const [editing, setEditing] = useState(null);
-
-  // Fetch students from backend on mount
-  useEffect(() => {
-    fetchStudents()
-      .then((res) => {
+  const loadStudents = async () => {
+      try {
+        const res = await fetchStudents();
         const transformed = res.data.map((s) => ({
-          id: s.id, // backend MongoDB id
+          id: s.id,
           roll: s.rollNo,
           name: s.name,
           marks: s.marks,
@@ -30,129 +28,112 @@ export default function App() {
           status: s.marks >= 40 ? "Pass" : "Fail",
         }));
         setStudents(transformed);
-      })
-      .catch((err) => {
-        console.error("Error fetching students:", err);
+      } catch (err) {
+        console.error(err);
         toast.error("Failed to load students from backend!");
-      });
+      }
+    };
+
+  // Fetch students from backend on mount
+  useEffect(() => {
+    
+    loadStudents();
   }, []);
 
-  // Handle form submit (add or edit)
+  useEffect(() => {
+    
+    loadStudents();
+  }, [students]);
+
+  // Handle add or edit
   const handleFormSubmit = async (data, currentRoll) => {
     const prepared = prepareStudent(data);
-    const newStudent = {
-      ...prepared,
-      status: prepared.marks >= 40 ? "Pass" : "Fail",
+    const payload = {
+      name: prepared.name,
+      rollNo: prepared.roll,
+      marks: prepared.marks,
+      gender: prepared.gender,
     };
 
     if (currentRoll) {
-      // EDIT existing student
+      // EDIT
       const studentToEdit = students.find((s) => s.roll === currentRoll);
       if (!studentToEdit) return;
 
       try {
-        const payload = {
-          name: newStudent.name,
-          rollNo: newStudent.roll,
-          marks: newStudent.marks,
-          gender: newStudent.gender,
-        };
         const updated = await updateStudentApi(studentToEdit.id, payload);
+        const updatedStudent = updated.data;
+
         setStudents((prev) =>
           prev.map((s) =>
-            s.id === studentToEdit.id
+            s.id === updatedStudent.id
               ? {
-                  ...s,
-                  name: updated.name,
-                  roll: updated.rollNo,
-                  marks: updated.marks,
-                  gender: updated.gender,
-                  status: updated.marks >= 40 ? "Pass" : "Fail",
+                  id: updatedStudent.id,
+                  roll: updatedStudent.rollNo,
+                  name: updatedStudent.name,
+                  marks: updatedStudent.marks,
+                  gender: updatedStudent.gender,
+                  status: updatedStudent.marks >= 40 ? "Pass" : "Fail",
                 }
               : s
           )
         );
-        toast.info("Student updated!");
+        toast.success("Student updated!");
         setEditing(null);
       } catch (err) {
-        console.error("Failed to update student:", err);
+        console.error(err);
         toast.error("Failed to update student!");
       }
     } else {
-      // ADD new student
-      const tempId = Date.now();
-      const studentForTable = { id: tempId, ...newStudent };
-      setStudents((prev) => [...prev, studentForTable]);
-      toast.success("Student added to table!");
-
+      // ADD
       try {
-        const payload = {
-          name: newStudent.name,
-          rollNo: newStudent.roll,
-          marks: newStudent.marks,
-          gender: newStudent.gender,
-        };
         const saved = await addStudent(payload);
-        setStudents((prev) =>
-          prev.map((s) =>
-            s.id === tempId
-              ? {
-                  id: saved._id,
-                  roll: saved.rollNo,
-                  name: saved.name,
-                  marks: saved.marks,
-                  gender: saved.gender,
-                  status: saved.marks >= 40 ? "Pass" : "Fail",
-                }
-              : s
-          )
-        );
+        const newStudent = {
+          id: saved.id,
+          roll: saved.rollNo,
+          name: saved.name,
+          marks: saved.marks,
+          gender: saved.gender,
+          status: saved.marks >= 40 ? "Pass" : "Fail",
+        };
+        setStudents((prev) => [...prev, newStudent]);
+        toast.success("Student added!");
       } catch (err) {
-        console.error("Failed to save student in backend:", err);
-        toast.error("Failed to save student in backend!");
+        console.error(err);
+        toast.error("Failed to add student!");
       }
     }
   };
 
-  // Delete student
+  // Delete
   const handleDelete = async (id) => {
     try {
       await deleteStudentApi(id);
       setStudents((prev) => prev.filter((s) => s.id !== id));
-      toast.success("Student deleted!");
+      toast.error("Student deleted!");
     } catch (err) {
-      console.error("Failed to delete student:", err);
+      console.error(err);
       toast.error("Failed to delete student!");
     }
   };
 
-  // Edit click from table
-  const handleEditClick = (student) => {
-    setEditing(student);
-  };
+  // Edit click
+  const handleEditClick = (student) => setEditing(student);
 
-  // Categorize by gender
-  const maleStudents = useMemo(
-    () => students.filter((s) => s.gender === "Male"),
-    [students]
-  );
-  const femaleStudents = useMemo(
-    () => students.filter((s) => s.gender === "Female"),
-    [students]
-  );
+  // Gender filter
+  const maleStudents = useMemo(() => students.filter((s) => s.gender === "Male"), [students]);
+  const femaleStudents = useMemo(() => students.filter((s) => s.gender === "Female"), [students]);
 
   return (
     <div className="min-h-screen p-6 bg-gray-50">
       <div className="max-w-7xl mx-auto space-y-6">
         <Header />
-
         <StudentForm
           onSubmitForm={handleFormSubmit}
           students={students}
           editing={editing}
           cancelEdit={() => setEditing(null)}
         />
-
         <div className="grid md:grid-cols-2 gap-6">
           <StudentTable
             title="Male Students"
@@ -167,15 +148,9 @@ export default function App() {
             onDelete={handleDelete}
           />
         </div>
-
         <StatsPanel students={students} />
       </div>
-
-      <ToastContainer
-        position="top-right"
-        autoClose={2000}
-        hideProgressBar={false}
-      />
+      <ToastContainer position="top-right" autoClose={2000} hideProgressBar={false} />
     </div>
   );
 }
