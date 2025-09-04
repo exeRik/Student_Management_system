@@ -6,7 +6,7 @@ import { isDuplicateRoll } from "../utils/studentUtils";
 const defaultValues = { name: "", roll: "", marks: "", gender: "Male" };
 
 export default function StudentForm({ onSubmitForm, students, editing, cancelEdit }) {
-  const { register, handleSubmit, reset, setError } = useForm({ defaultValues });
+  const { register, handleSubmit, reset, setError, } = useForm({ defaultValues });
 
   // Prefill form on edit
   useEffect(() => {

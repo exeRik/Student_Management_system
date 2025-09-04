@@ -16,6 +16,9 @@ import {
 export default function App() {
   const [students, setStudents] = useState([]);
   const [editing, setEditing] = useState(null);
+
+  const studentArray={...students}
+
   const loadStudents = async () => {
       try {
         const res = await fetchStudents();
@@ -40,10 +43,10 @@ export default function App() {
     loadStudents();
   }, []);
 
-  useEffect(() => {
+  // useEffect(() => {
     
-    loadStudents();
-  }, [students]);
+  //   loadStudents();
+  // }, [students]);
 
   // Handle add or edit
   const handleFormSubmit = async (data, currentRoll) => {
@@ -88,15 +91,19 @@ export default function App() {
       // ADD
       try {
         const saved = await addStudent(payload);
+        // console.log("savde",saved)
         const newStudent = {
-          id: saved.id,
-          roll: saved.rollNo,
-          name: saved.name,
-          marks: saved.marks,
-          gender: saved.gender,
-          status: saved.marks >= 40 ? "Pass" : "Fail",
+          id: saved.data.id,
+          roll: saved.data.rollNo,
+          name: saved.data.name,
+          marks: saved.data.marks,
+          gender: saved.data.gender,
+          status: saved.data.marks >= 40 ? "Pass" : "Fail",
         };
+                console.log("student",newStudent)
+
         setStudents((prev) => [...prev, newStudent]);
+
         toast.success("Student added!");
       } catch (err) {
         console.error(err);
@@ -123,6 +130,7 @@ export default function App() {
   // Gender filter
   const maleStudents = useMemo(() => students.filter((s) => s.gender === "Male"), [students]);
   const femaleStudents = useMemo(() => students.filter((s) => s.gender === "Female"), [students]);
+
 
   return (
     <div className="min-h-screen p-6 bg-gray-50">
