@@ -1,7 +1,7 @@
 import React from "react";
 
 export default function StudentTable({ title, students, onEdit, onDelete }) {
-  const cellClass = "px-1 py-2 text-left"; // shared cell style
+  const cellClass = "px-1 py-2 text-left"; 
   const rowClass = "hover:bg-gray-50 transition-colors border-b";
 
   // Columns to display (except Actions)

@@ -17,8 +17,6 @@ export default function App() {
   const [students, setStudents] = useState([]);
   const [editing, setEditing] = useState(null);
 
-  const studentArray={...students}
-
   const loadStudents = async () => {
       try {
         const res = await fetchStudents();

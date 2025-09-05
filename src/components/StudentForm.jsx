@@ -12,10 +12,10 @@ export default function StudentForm({ onSubmitForm, students, editing, cancelEdi
   useEffect(() => {
     if (editing) {
       reset({
-        name: editing.name || "",
-        roll: editing.roll || "",
-        marks: editing.marks || "",
-        gender: editing.gender || "Male",
+        name: editing.name,
+        roll: editing.roll ,
+        marks: editing.marks ,
+        gender: editing.gender ,
       });
     } else {
       reset(defaultValues);
